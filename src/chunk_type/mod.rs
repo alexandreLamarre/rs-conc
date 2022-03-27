@@ -11,7 +11,7 @@ fn convert_slice_to_fixed(arr: &[u8]) -> [u8; 4] {
 /// 4-byte consisting of only uppercase and lowercase ASCII letters
 /// (A-Z and a-z, or 65-90 and 97-122 decimal)
 #[derive(PartialEq, Debug)]
-struct ChunkType {
+pub struct ChunkType {
     _container: [u8; 4],
 }
 
