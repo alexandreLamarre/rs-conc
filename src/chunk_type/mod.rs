@@ -1,5 +1,6 @@
+use std::convert::TryFrom;
 use std::convert::TryInto;
-
+use std::str::FromStr;
 /// Converts a byte slice to one of size 4.
 fn convert_slice_to_fixed(arr: &[u8]) -> [u8; 4] {
     arr.try_into().expect("Slice with incorrect length")
@@ -15,26 +16,6 @@ struct ChunkType {
 
 /// methods
 impl ChunkType {
-    /// Create from static byte array
-    pub fn try_from(arr: [u8; 4]) -> Result<ChunkType, String> {
-        for &byte_val in arr.iter() {
-            // Check valid ascii value
-            if byte_val < 65 || (byte_val > 90 && byte_val < 97) || byte_val > 122 {
-                return Err(
-                    "Chunk type encoding must be in ascii lowercase/upper case (65-90/97-122)"
-                        .to_string(),
-                );
-            }
-        }
-        let c = ChunkType { _container: arr };
-        Ok(c)
-    }
-    /// Create from &str slice
-    pub fn from_str(input_str: &str) -> Result<ChunkType, String> {
-        let res: ChunkType = ChunkType::try_from(convert_slice_to_fixed(input_str.as_bytes()))?;
-
-        Ok(res)
-    }
     /// Returns the actual bytes of the Chunk Type
     pub fn bytes(&self) -> [u8; 4] {
         self._container
@@ -78,6 +59,33 @@ impl ToString for ChunkType {
             Err(e) => panic!("Invalid byte sequence for UTF-8 sequence {}", e),
         };
         s
+    }
+}
+
+impl TryFrom<[u8; 4]> for ChunkType {
+    type Error = &'static str;
+    /// Create from static byte array
+    fn try_from(arr: [u8; 4]) -> Result<Self, Self::Error> {
+        for &byte_val in arr.iter() {
+            // Check valid ascii value
+            if byte_val < 65 || (byte_val > 90 && byte_val < 97) || byte_val > 122 {
+                return Err(
+                    "Chunk type encoding must be in ascii lowercase/upper case (65-90/97-122)",
+                );
+            }
+        }
+        let c = ChunkType { _container: arr };
+        Ok(c)
+    }
+}
+
+impl FromStr for ChunkType {
+    /// Create from &str slice
+    type Err = &'static str;
+    fn from_str(input_str: &str) -> Result<Self, Self::Err> {
+        let res: ChunkType = ChunkType::try_from(convert_slice_to_fixed(input_str.as_bytes()))?;
+
+        Ok(res)
     }
 }
 
