@@ -1,5 +1,6 @@
 use std::convert::TryFrom;
 use std::convert::TryInto;
+use std::fmt;
 use std::str::FromStr;
 /// Converts a byte slice to one of size 4.
 fn convert_slice_to_fixed(arr: &[u8]) -> [u8; 4] {
@@ -50,9 +51,8 @@ impl ChunkType {
     pub fn is_valid(&self) -> bool {
         self.is_reserved_bit_valid()
     }
-}
 
-impl ToString for ChunkType {
+    /// Convert to string
     fn to_string(&self) -> String {
         let s = match String::from_utf8(self._container.to_vec()) {
             Ok(v) => v,
@@ -86,6 +86,12 @@ impl FromStr for ChunkType {
         let res: ChunkType = ChunkType::try_from(convert_slice_to_fixed(input_str.as_bytes()))?;
 
         Ok(res)
+    }
+}
+
+impl fmt::Display for ChunkType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self._container)
     }
 }
 
@@ -184,12 +190,4 @@ mod tests {
         let chunk = ChunkType::from_str("RuSt").unwrap();
         assert_eq!(&chunk.to_string(), "RuSt");
     }
-
-    // #[test]
-    // pub fn test_chunk_type_trait_impls() {
-    //     let chunk_type_1: ChunkType = TryFrom::try_from([82, 117, 83, 116]).unwrap();
-    //     let chunk_type_2: ChunkType = FromStr::from_str("RuSt").unwrap();
-    //     let _chunk_string = format!("{}", chunk_type_1);
-    //     let _are_chunks_equal = chunk_type_1 == chunk_type_2;
-    // }
 }
